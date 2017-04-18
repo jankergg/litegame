@@ -21,7 +21,7 @@ Enemy.prototype.init = function() {
     if (allEnemies) {
         for (var i = 0, len = allEnemies.length; i < len; i++) {
             en = allEnemies[i];
-            if (en.x < 0 && en!==this) {
+            if (en.x < 0 && en !== this) {
                 if (Math.abs(ap.x - en.x) < 100 && ap.y === en.y) {
                     //检测到位置重复，则重新生成
                     console.log('oops...');
@@ -54,10 +54,10 @@ Enemy.prototype.rndm = function() {
 // 参数: dt ，表示时间间隙
 Enemy.prototype.update = function(dt) {
     // 控制游戏
-    if(Enemy.GAMEOVER){return;}
+    if (Enemy.GAMEOVER) { return; }
     // 你应该给每一次的移动都乘以 dt 参数，以此来保证游戏在所有的电脑上
     // 都是以同样的速度运行的
-    this.move(dt * Math.abs(500-this.y)*1.5);
+    this.move(dt * Math.abs(200 - this.y) * 1.5);
 
     if (this.x > ctx.canvas.offsetWidth) {
         // 重置敌人状态，分配随机位置
@@ -163,6 +163,7 @@ Player.prototype.success = function() {
 
     drawStroked('congratulations!', ctx.canvas.offsetWidth / 2, 40)
 
+    // 在屏幕上显示文字
     function drawStroked(text, x, y) {
         text = text.toUpperCase();
         ctx.font = "46px Impact";
@@ -173,13 +174,84 @@ Player.prototype.success = function() {
         ctx.fillStyle = 'darkgreen';
         ctx.fillText(text, x, y);
     }
+    setTimeout(function() {
+        player.init(3,4);
+        RunStars()
+    })
 };
 // 处理键盘事件，并传递给move方法
 Player.prototype.handleInput = function(direction) {
     this.move(direction)
 };
 
-// 把所有敌人的对象都放进一个叫 allEnemies 的数组里面
+//小星星类
+var Star = function(index) {
+    this.width = 40;
+    this.height = 40;
+
+    //半径
+    this.r = 100;
+    this.index = index;
+    //星星之间的角度
+    this.angle = (index + 1) * (360 / Star.MAX_NUM);
+    //两个星星之间的弧度
+    this.radian = this.angle * (Math.PI / 180);
+    this.init();
+}
+Star.MAX_NUM = 10;
+Star.prototype.simg = null;
+Star.prototype.init = function() {
+    //圆心坐标
+    this.ox = ctx.canvas.offsetWidth / 2;
+    this.oh = ctx.canvas.offsetHeight / 2+50;
+    this.x = (this.ox + this.r * Math.cos(this.radian)) - this.width / 2;
+    this.y = (this.oh + this.r * Math.sin(this.radian)) - this.height / 2;
+    this.simg = this.simg.cloneNode(true);
+}
+Star.prototype.render = function() {
+    ctx.drawImage(this.simg, this.x, this.y, this.width, this.height);
+}
+Star.prototype.move = function() {
+    if (this.angle == 360) {
+        this.angle = 0;
+    }
+    this.angle = this.angle + 1;
+    this.radian = this.angle * (Math.PI / 180);
+    this.x = (this.ox + this.r * Math.cos(this.radian)) - this.width / 2;
+    this.y = (this.oh + this.r * Math.sin(this.radian)) - this.height / 2;
+    this.render();
+}
+var RunStars = function() {
+    var stars = [];
+    RunStars = function() {
+        var cw = ctx.canvas.offsetWidth;
+        var ch = ctx.canvas.offsetHeight;
+        // ctx.clearRect(0, 0, cw, ch);
+        // ctx.beginPath();
+        // ctx.rect(0, 0, cw, ch);
+        // ctx.fillStyle = "blue";
+        // ctx.fill();
+        // ctx.closePath();
+        ctx.fillStyle = ctx.createPattern(Resources.get('images/grass-block.png'),'repeat');
+        ctx.fill();
+
+        for (var i = 0; i < stars.length; i++) {
+            stars[i].move();
+        }
+        window.requestAnimationFrame(RunStars)
+    };
+    // 缓存小图片在原型上，所有实例可以共享
+    Star.prototype.simg = new Image();
+    Star.prototype.simg.onload = function() {
+        for (var i = 0; i < 12; i++) {
+            stars.push(new Star(i))
+        }
+        RunStars();
+    }
+    Star.prototype.simg.src = 'images/Star.png';
+};
+
+// 把有敌人的对象都放进一个叫 allEnemies 的数组里面
 var allEnemies = (function(a) {
     var arr = [];
     for (var i = 0; i < a.MAX_ENEMIES; i++) {
