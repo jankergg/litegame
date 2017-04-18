@@ -57,7 +57,7 @@ Enemy.prototype.update = function(dt) {
     if(Enemy.GAMEOVER){return;}
     // 你应该给每一次的移动都乘以 dt 参数，以此来保证游戏在所有的电脑上
     // 都是以同样的速度运行的
-    this.move(dt * 500);
+    this.move(dt * Math.abs(500-this.y)*1.5);
 
     if (this.x > ctx.canvas.offsetWidth) {
         // 重置敌人状态，分配随机位置
