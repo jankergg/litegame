@@ -8,3 +8,6 @@
 ## 运行方法
 - 克隆本项目，在根目录下，找到`index.html`,在浏览器打开即可运行
 - 如果您正在使用IE浏览器，请确保版本不低于IE9.0。推荐使用 `chrome, Safari`或者`firefox`等浏览器。
+
+## 说明
+- 本项目基于[udacity经典街机游戏克隆](https://github.com/udacity/cn-frontend-development-advanced/tree/master/Arcade%20Game%20Clone_zh)项目开发，欢迎就相关问题提出建议.
