@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>测试</title>
+</head>
+<body>
+    <canvas id="myCanvas" width="250" height="250">
+        这个浏览器不支持HTML5元素。
+    </canvas>
+    <script type="text/javascript">
+        var ball_count = 12;//小球的个数
+        var circle_x = 0;//圆心的X坐标
+        var circle_y = 0;//圆心的Y坐标
+        var circle_r = 50;//圆的半径
+        var now_count = 0;//当前显示小球的个数
+        var balls_array;//用来存储小球信息
+        var angle_change = 1;//角度变化
+        var canvas;//画布
+        var context;//画布环境
+        window.onload = function () {
+            canvas = document.getElementById('myCanvas');
+            context = canvas.getContext('2d');
+            balls_array = new Array(ball_count);
+            circle_x = canvas.width / 2;
+            circle_y = canvas.height / 2;
+            loadBall();
+        };
+        //小球移动
+        function ballMove() {
+            context.clearRect(0, 0, canvas.width, canvas.height);//清空画布中内容
+            for (var i = 0; i < balls_array.length; i++) {
+                var ball = balls_array[i];
+                if (ball.angle == 360) {
+                    ball.angle = 0;
+                }
+                ball.angle = ball.angle + angle_change;//角度
+                var radian = ball.angle * (Math.PI / 180);//弧度
+                ball.x = (circle_x + circle_r * Math.cos(radian)) - ball.w / 2;
+                ball.y = (circle_y + circle_r * Math.sin(radian)) - ball.h / 2;
+                context.drawImage(ball.image, ball.x, ball.y, ball.w, ball.h);
+            }
+            window.requestAnimationFrame(ballMove)
+        }
+        //加载小球
+        function loadBall() {
+            for (var i = 0; i < ball_count; i++) {
+                var angle = (i + 1) * (360 / ball_count);//角度
+                var radian = angle * (Math.PI / 180);//弧度
+                //初始化图片
+                var img = new Image()
+                img.id = i + 1;
+                img.src = 'images/Star.png';
+                //存放小球信息
+                var ball = {};
+                ball.id = img.id;
+                ball.w = 32;
+                ball.h = 32;
+                ball.x = (circle_x + circle_r * Math.cos(radian)) - ball.w / 2;
+                ball.y = (circle_y + circle_r * Math.sin(radian)) - ball.h / 2;
+                ball.angle = angle;
+                ball.image = img;
+                balls_array[i] = ball;
+                img.onload = function () {
+                    for (var j = 0; j < balls_array.length; j++) {
+                        if (this.id == balls_array[j].id) {
+                            var item = balls_array[j];
+                            context.drawImage(img, item.x, item.y, item.w, item.h);
+                            break;
+                        }
+                    }
+                    now_count++;
+                    if (now_count == ball_count) {//当小球全部加载完成
+                        requestAnimationFrame(ballMove);//40ms移动小球
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

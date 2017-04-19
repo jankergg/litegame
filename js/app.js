@@ -147,9 +147,11 @@ Player.prototype.init = function(x, y) {
     y = y || 6;
     this.x = (x - 1) * 101;
     this.y = (y - 1) * 83 - 10;
-    this.passed = false;
+    this.setState(0);
 };
-
+Player.prototype.setState = function(state){
+    this.passed = !!state ;
+}
 // 渲染玩家到canvas画布
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -158,7 +160,7 @@ Player.prototype.render = function() {
 // 玩家过关成功
 Player.prototype.success = function() {
     if (this.passed) { return; }
-    this.passed = true;
+    this.setState(1);
     Enemy.GAMEOVER = true;
 
     drawStroked('congratulations!', ctx.canvas.offsetWidth / 2, 40)
@@ -175,9 +177,11 @@ Player.prototype.success = function() {
         ctx.fillText(text, x, y);
     }
     setTimeout(function() {
-        player.init(3,4);
+        player.init(3,3);
+        player.setState(1);
+        allEnemies.length=0;
         RunStars()
-    })
+    },200)
 };
 // 处理键盘事件，并传递给move方法
 Player.prototype.handleInput = function(direction) {
@@ -186,8 +190,8 @@ Player.prototype.handleInput = function(direction) {
 
 //小星星类
 var Star = function(index) {
-    this.width = 40;
-    this.height = 40;
+    this.width = 50;
+    this.height = 50;
 
     //半径
     this.r = 100;
@@ -198,29 +202,34 @@ var Star = function(index) {
     this.radian = this.angle * (Math.PI / 180);
     this.init();
 }
+// 星星的数量
 Star.MAX_NUM = 10;
+// 星星图片 缓存在原型上
 Star.prototype.simg = null;
+//初始化，设定圆心坐标，及x，y坐标
 Star.prototype.init = function() {
     //圆心坐标
     this.ox = ctx.canvas.offsetWidth / 2;
-    this.oh = ctx.canvas.offsetHeight / 2+50;
+    this.oh = ctx.canvas.offsetHeight / 2-50;
     this.x = (this.ox + this.r * Math.cos(this.radian)) - this.width / 2;
     this.y = (this.oh + this.r * Math.sin(this.radian)) - this.height / 2;
-    this.simg = this.simg.cloneNode(true);
 }
+//渲染到画布
 Star.prototype.render = function() {
     ctx.drawImage(this.simg, this.x, this.y, this.width, this.height);
 }
+// 移动方法 每次递增2度
 Star.prototype.move = function() {
     if (this.angle == 360) {
         this.angle = 0;
     }
-    this.angle = this.angle + 1;
+    this.angle = this.angle + 2;
     this.radian = this.angle * (Math.PI / 180);
     this.x = (this.ox + this.r * Math.cos(this.radian)) - this.width / 2;
     this.y = (this.oh + this.r * Math.sin(this.radian)) - this.height / 2;
     this.render();
 }
+// 启动星星动画的方法
 var RunStars = function() {
     var stars = [];
     RunStars = function() {
@@ -232,15 +241,19 @@ var RunStars = function() {
         // ctx.fillStyle = "blue";
         // ctx.fill();
         // ctx.closePath();
-        ctx.fillStyle = ctx.createPattern(Resources.get('images/grass-block.png'),'repeat');
-        ctx.fill();
-
+        // ctx.fillStyle = ctx.createPattern(Resources.get('images/grass-block.png'),'repeat');
+        // ctx.fill();
+        var ox = player.x+50;
+        var oh = player.y+82
         for (var i = 0; i < stars.length; i++) {
+            stars[i].ox = ox;
+            stars[i].oh = oh;
             stars[i].move();
         }
         window.requestAnimationFrame(RunStars)
     };
     // 缓存小图片在原型上，所有实例可以共享
+    // 图片加载完成 运行
     Star.prototype.simg = new Image();
     Star.prototype.simg.onload = function() {
         for (var i = 0; i < 12; i++) {
